@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pydantic
+passlib
+pyjwt
+email-validator
+cloudinary
+python-multipart
+slowapi
