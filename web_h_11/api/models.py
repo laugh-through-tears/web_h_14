@@ -1,17 +1,29 @@
-from sqlalchemy import Column, Integer, String, Date
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from api.database import Base
 
-Base = declarative_base()
+class User(Base):
+    __tablename__ = "users"
 
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    is_active = Column(Integer, default=1)
+    avatar_url = Column(String, nullable=True)
+
+    contacts = relationship("Contact", back_populates="owner")
 
 class Contact(Base):
     __tablename__ = "contacts"
 
-
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    surname = Column(String)
-    email = Column(String)
-    phone_number = Column(String)
-    birth_date = Column(Date)
-    additional_data = Column(String, nullable=True)
+    first_name = Column(String, index=True)
+    last_name = Column(String, index=True)
+    email = Column(String, index=True)
+    phone_number = Column(String, index=True)
+    birth_date = Column(DateTime, index=True)
+    additional_info = Column(String, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+
+    owner = relationship("User", back_populates="contacts")
+

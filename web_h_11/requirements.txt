@@ -9,3 +9,9 @@ email-validator
 cloudinary
 python-multipart
 slowapi
+pydantic-settings
+python-jose
+passlib[bcrypt]
+python-dotenv
+pytest
+requests
