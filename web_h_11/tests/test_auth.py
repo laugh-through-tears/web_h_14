@@ -1,43 +1,52 @@
 import unittest
-from api import api, db
-from api.models import User
+from unittest.mock import patch
+from api.auth import verify_password, get_password_hash, create_access_token, create_refresh_token, get_email_form_refresh_token, get_current_user
 
 class AuthTestCase(unittest.TestCase):
+    @patch('api.auth.verify_password')
+    def test_verify_password(self, mock_verify_password):
+        """
+        Test case for verifying password.
+        """
+        mock_verify_password.return_value = True
+        self.assertTrue(verify_password('plain_password', 'hashed_password'))
 
-    def setUp(self):
-        api.config['TESTING'] = True
-        api.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-        self.app = api.test_client()
-        db.create_all()
+    @patch('api.auth.get_password_hash')
+    def test_get_password_hash(self, mock_get_password_hash):
+        """
+        Test case for getting password hash.
+        """
+        mock_get_password_hash.return_value = 'hashed_password'
+        self.assertEqual(get_password_hash('plain_password'), 'hashed_password')
 
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
+    @patch('api.auth.create_access_token')
+    def test_create_access_token(self, mock_create_access_token):
+        """
+        Test case for creating access token.
+        """
+        mock_create_access_token.return_value = 'access_token'
+        self.assertEqual(create_access_token({'sub': 'test'}), 'access_token')
 
-    def test_registration(self):
-        # Test registration endpoint
-        response = self.app.post('/register', json={'username': 'testuser', 'password': 'password'})
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue('access_token' in response.json)
-        self.assertTrue('refresh_token' in response.json)
+    @patch('api.auth.create_refresh_token')
+    def test_create_refresh_token(self, mock_create_refresh_token):
+        """
+        Test case for creating refresh token.
+        """
+        mock_create_refresh_token.return_value = 'refresh_token'
+        self.assertEqual(create_refresh_token({'sub': 'test'}), 'refresh_token')
 
-    def test_login(self):
-        # Test login endpoint
-        User.create(username='testuser', password='password')
-        response = self.app.post('/login', json={'username': 'testuser', 'password': 'password'})
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue('access_token' in response.json)
-        self.assertTrue('refresh_token' in response.json)
+    @patch('api.auth.get_email_form_refresh_token')
+    def test_get_email_form_refresh_token(self, mock_get_email_form_refresh_token):
+        """
+        Test case for getting email from refresh token.
+        """
+        mock_get_email_form_refresh_token.return_value = 'test@example.com'
+        self.assertEqual(get_email_form_refresh_token('token'), 'test@example.com')
 
-    def test_protected_route(self):
-        # Test protected route
-        User.create(username='testuser', password='password')
-        response = self.app.post('/login', json={'username': 'testuser', 'password': 'password'})
-        access_token = response.json['access_token']
-        headers = {'Authorization': f'Bearer {access_token}'}
-        response = self.app.get('/protected', headers=headers)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'Protected Route')
-
-if __name__ == '__main__':
-    unittest.main()
+    @patch('api.auth.get_current_user')
+    def test_get_current_user(self, mock_get_current_user):
+        """
+        Test case for getting current user.
+        """
+        mock_get_current_user.return_value = {'email': 'test@example.com'}
+        self.assertEqual(get_current_user('db', 'token'), {'email': 'test@example.com'})

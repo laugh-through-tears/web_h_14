@@ -3,6 +3,9 @@ from sqlalchemy.orm import relationship
 from api.database import Base
 
 class User(Base):
+    """
+    User model class.
+    """
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -14,6 +17,9 @@ class User(Base):
     contacts = relationship("Contact", back_populates="owner")
 
 class Contact(Base):
+    """
+    Contact model class.
+    """
     __tablename__ = "contacts"
 
     id = Column(Integer, primary_key=True, index=True)
